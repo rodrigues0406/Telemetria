@@ -15,8 +15,42 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from api_telemetria.api import viewsets
+from rest_framework import routers, permissions
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title= "API para telemetira de veiculos agricolas",
+        default_version = 'v1',
+        description = 'Sistema para cadastro e controle por telemetria de frota e veiculos',
+        terms_of_services= "",
+        contact= openapi.Contact(email='contact@teste.com'), 
+        license= openapi.License(name='OpenSource')
+    ),
+ public=True,
+ permission_classes=[permissions.AllowAny]
+)
+
+
+route = routers.DefaultRouter()
+route.register(r'Marca', viewsets.MarcaViewSet, basename="Marca")
+route.register(r'Modelo', viewsets.ModeloViewSet, basename="Modelo")
+route.register(r'UnidadeMedida', viewsets.ModeloViewSet, basename="unidadeMedida")
+route.register(r'Veiculo', viewsets.VeiculoViewSet, basename="Veiculo")
+route.register(r'Medicao', viewsets.MedicaoViewSet, basename="Medicao")
+route.register(r'MedicaoVeiculo', viewsets.MedicaoVeiculoViewSet, basename="MedicaoVeiculo")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include(route.urls)),
+]
+
+
+urlpatterns += [
+    path('swaggerjson/', schema_view.without_ui(cache_timeout=0),name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagg'),
+    path('redoc/', schema_view.with_ui('redoc',cache_timeout=0), name='schema-redoc')
 ]
